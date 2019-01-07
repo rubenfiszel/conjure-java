@@ -1,7 +1,7 @@
 package com.palantir.product;
 
+import com.palantir.conjure.java.lib.Bytes;
 import com.palantir.tokens.auth.AuthHeader;
-import java.nio.ByteBuffer;
 import java.util.Optional;
 import javax.annotation.Generated;
 import okhttp3.RequestBody;
@@ -24,11 +24,9 @@ public interface EteBinaryServiceRetrofit {
 
     @GET("./binary/optional/present")
     @Headers({"hr-path-template: /binary/optional/present", "Accept: application/json"})
-    Call<Optional<ByteBuffer>> getOptionalBinaryPresent(
-            @Header("Authorization") AuthHeader authHeader);
+    Call<Optional<Bytes>> getOptionalBinaryPresent(@Header("Authorization") AuthHeader authHeader);
 
     @GET("./binary/optional/empty")
     @Headers({"hr-path-template: /binary/optional/empty", "Accept: application/json"})
-    Call<Optional<ByteBuffer>> getOptionalBinaryEmpty(
-            @Header("Authorization") AuthHeader authHeader);
+    Call<Optional<Bytes>> getOptionalBinaryEmpty(@Header("Authorization") AuthHeader authHeader);
 }
