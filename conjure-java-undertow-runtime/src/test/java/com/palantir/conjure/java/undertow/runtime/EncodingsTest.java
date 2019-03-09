@@ -47,10 +47,8 @@ public final class EncodingsTest {
         List<List<Integer>> deserialized = deserialize(
                 asStream("[[1, 2], [3, 4]]"),
                 new TypeMarker<List<List<Integer>>>() {});
-        assertThat(deserialized)
-            .isInstanceOf(ImmutableList.class);
-        assertThat(deserialized.get(0))
-                .isInstanceOf(ImmutableList.class);
+        assertThat(deserialized).isInstanceOf(ImmutableList.class);
+        assertThat(deserialized.get(0)).isInstanceOf(ImmutableList.class);
     }
 
     @Test
@@ -58,10 +56,8 @@ public final class EncodingsTest {
         List<List<Integer>> deserialized = (List<List<Integer>>) (Object) deserialize(
                 asStream("[[1, 2], [3, 4]]"),
                 new TypeMarker<ImmutableList<ImmutableList<Integer>>>() {});
-        assertThat(deserialized)
-                .isInstanceOf(ImmutableList.class);
-        assertThat(deserialized.get(0))
-                .isInstanceOf(ImmutableList.class);
+        assertThat(deserialized).isInstanceOf(ImmutableList.class);
+        assertThat(deserialized.get(0)).isInstanceOf(ImmutableList.class);
     }
 
     @Test
