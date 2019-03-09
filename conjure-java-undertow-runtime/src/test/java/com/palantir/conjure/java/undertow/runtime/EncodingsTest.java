@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
@@ -31,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -39,6 +41,28 @@ public final class EncodingsTest {
     private final Encoding json = Encodings.json();
 
     // TODO(rfink): Wire tests for JSON serializer
+
+    @Test
+    public void json_deserializeList_toImmutableListRecursively() throws Exception {
+        List<List<Integer>> deserialized = deserialize(
+                asStream("[[1, 2], [3, 4]]"),
+                new TypeMarker<List<List<Integer>>>() {});
+        assertThat(deserialized)
+            .isInstanceOf(ImmutableList.class);
+        assertThat(deserialized.get(0))
+                .isInstanceOf(ImmutableList.class);
+    }
+
+    @Test
+    public void json_deserializeImmutableList_withImmutableMarkerAndCasting() throws Exception {
+        List<List<Integer>> deserialized = (List<List<Integer>>) (Object) deserialize(
+                asStream("[[1, 2], [3, 4]]"),
+                new TypeMarker<ImmutableList<ImmutableList<Integer>>>() {});
+        assertThat(deserialized)
+                .isInstanceOf(ImmutableList.class);
+        assertThat(deserialized.get(0))
+                .isInstanceOf(ImmutableList.class);
+    }
 
     @Test
     public void json_deserialize_throwsDeserializationErrorsAsIllegalArgumentException() {

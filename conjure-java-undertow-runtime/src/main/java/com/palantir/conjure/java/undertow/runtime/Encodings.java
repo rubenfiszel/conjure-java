@@ -17,10 +17,13 @@
 package com.palantir.conjure.java.undertow.runtime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.type.CollectionLikeType;
+import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.undertow.lib.TypeMarker;
 import com.palantir.logsafe.Preconditions;
@@ -29,6 +32,7 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 // TODO(rfink): Consider async Jackson, see
 //              https://github.com/spring-projects/spring-framework/commit/31e0e537500c0763a36d3af2570d5c253a374690
@@ -54,9 +58,22 @@ public final class Encodings {
             };
         }
 
+        public static JavaType toImmutableList(JavaType javaType) {
+            if (javaType.isCollectionLikeType()) {
+                if (javaType.getRawClass().equals(List.class)) {
+                    return javaType
+                            .withContentType(toImmutableList(javaType.getContentType()))
+                            .refine(ImmutableList.class, javaType.getBindings(), null, new JavaType[]{javaType});
+                }
+            }
+            return javaType;
+        }
+
         @Override
         public <T> Deserializer<T> deserializer(TypeMarker<T> type) {
-            ObjectReader reader = mapper.readerFor(mapper.constructType(type.getType()));
+            JavaType javaType = mapper.constructType(type.getType());
+            JavaType refined = toImmutableList(javaType);
+            ObjectReader reader = mapper.readerFor(refined);
             return input -> {
                 try {
                     T value = reader.readValue(input);
